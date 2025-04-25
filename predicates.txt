@@ -1,0 +1,19 @@
+// مشخصه‌گذاری رسمی سیستم شهربازی با استفاده از منطق گزاره‌ای
+
+// قانون 1: اگر کاربر وارد نشده باشد، نمی‌تواند بلیت بخرد
+∀u ∈ Users: ¬authenticated(u) → ¬canBuyTicket(u)
+
+// قانون 2: فقط بازی‌های فعال امکان خرید بلیت دارند
+∀g ∈ Games: ¬active(g) → ∀u ∈ Users: ¬canBuyTicketFor(u, g)
+
+// قانون 3: هر بلیت معتبر باید متعلق به یک کاربر باشد
+∀t ∈ Tickets: valid(t) → ∃u ∈ Users: t ∈ u.tickets
+
+// قانون 4: مدیر می‌تواند وضعیت بازی‌ها را تغییر دهد
+∀g ∈ Games: canChangeStatus(admin, g)
+
+// قانون 5: فقط کاربران لاگین کرده می‌توانند لیست بازی‌ها را ببینند
+∀u ∈ Users: authenticated(u) → canViewGames(u)
+
+// قانون 6: کاربران فقط در صورت ورود می‌توانند بلیت خریداری کنند
+∀u ∈ Users: authenticated(u) ∧ ∃g ∈ Games: active(g) → canBuyTicketFor(u, g)
