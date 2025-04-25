@@ -1,19 +1,28 @@
-// مشخصه‌گذاری رسمی سیستم شهربازی با استفاده از منطق گزاره‌ای
+-- قوانین منطقی برای سامانه مدیریت شهربازی --
 
-// قانون 1: اگر کاربر وارد نشده باشد، نمی‌تواند بلیت بخرد
-∀u ∈ Users: ¬authenticated(u) → ¬canBuyTicket(u)
+-- 1. فقط کاربر وارد شده می‌تواند بلیت خریداری کند
+∀ u ∈ Users: u.loggedIn = true → allowBuyTicket(u)
 
-// قانون 2: فقط بازی‌های فعال امکان خرید بلیت دارند
-∀g ∈ Games: ¬active(g) → ∀u ∈ Users: ¬canBuyTicketFor(u, g)
+-- 2. فقط بازی‌های فعال در پنل کاربر نمایش داده می‌شوند
+∀ g ∈ Games: g.isActive = true → g.visible = true
 
-// قانون 3: هر بلیت معتبر باید متعلق به یک کاربر باشد
-∀t ∈ Tickets: valid(t) → ∃u ∈ Users: t ∈ u.tickets
+-- 3. اگر ظرفیت بازی صفر باشد، خرید بلیت مجاز نیست
+∀ g ∈ Games: g.capacity = 0 → denyPurchase(g)
 
-// قانون 4: مدیر می‌تواند وضعیت بازی‌ها را تغییر دهد
-∀g ∈ Games: canChangeStatus(admin, g)
+-- 4. پس از هر خرید موفق، یک واحد از ظرفیت بازی کم می‌شود
+∀ p ∈ Purchases: p.success = true → p.game.capacity' = p.game.capacity - 1
 
-// قانون 5: فقط کاربران لاگین کرده می‌توانند لیست بازی‌ها را ببینند
-∀u ∈ Users: authenticated(u) → canViewGames(u)
+-- 5. مدیر نمی‌تواند بازی‌ای را که بلیت فروخته، حذف کند
+∀ g ∈ Games: g.ticketsSold > 0 → cannotDelete(g)
 
-// قانون 6: کاربران فقط در صورت ورود می‌توانند بلیت خریداری کنند
-∀u ∈ Users: authenticated(u) ∧ ∃g ∈ Games: active(g) → canBuyTicketFor(u, g)
+-- 6. فقط مدیر امکان افزودن/ویرایش/حذف بازی‌ها را دارد
+∀ a ∈ Admins, g ∈ Games: canManage(g) ↔ a.isAdmin = true
+
+-- 7. فقط کاربرانی که ثبت‌نام کرده‌اند، اجازه ورود دارند
+∀ u ∈ Users: u.registered = true → allowLogin(u)
+
+-- 8. کاربر نمی‌تواند بلیت یک بازی غیرفعال را بخرد
+∀ g ∈ Games: g.isActive = false → denyPurchase(g)
+
+-- 9. بلیت به کاربر فعلی نسبت داده می‌شود
+∀ p ∈ Purchases: p.userId = currentUserId
